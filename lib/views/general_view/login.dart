@@ -17,7 +17,7 @@ class Login extends GetView<AuthController> {
             child: CircularProgressIndicator(color: AppColors.primary),
           );
         }
-        
+
         return Center(
           child: SafeArea(
             child: SingleChildScrollView(
@@ -28,7 +28,7 @@ class Login extends GetView<AuthController> {
                     Container(
                       padding: const EdgeInsetsGeometry.all(9.0),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
+                        color: AppColors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(15),
                       ),
                       child: Icon(
@@ -42,9 +42,10 @@ class Login extends GetView<AuthController> {
                     ShaderMask(
                       blendMode: BlendMode.srcIn,
                       shaderCallback: (bounds) {
-                        return LinearGradient(colors: [AppColors.primary, AppColors.primaryDark],
-                        begin: Alignment.topLeft,
-                        end:  Alignment.bottomRight
+                        return LinearGradient(
+                          colors: [AppColors.primary, AppColors.primaryDark],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ).createShader(bounds);
                       },
                       child: Text(
@@ -94,9 +95,9 @@ class Login extends GetView<AuthController> {
                             TextFormField(
                               controller: controller.emailC,
                               validator: (value) {
-                                if(!GetUtils.isEmail(value!)){
+                                if (!GetUtils.isEmail(value!)) {
                                   return 'Format email salah';
-                                } else{
+                                } else {
                                   return null;
                                 }
                               },
@@ -104,6 +105,13 @@ class Login extends GetView<AuthController> {
                               keyboardType: TextInputType.emailAddress,
                               decoration: InputDecoration(
                                 errorBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    width: 0.1,
+                                    color: AppColors.error,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                focusedErrorBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
                                     width: 0.1,
                                     color: AppColors.error,
@@ -153,7 +161,9 @@ class Login extends GetView<AuthController> {
 
                             TextFormField(
                               controller: controller.passC,
-                              obscureText: controller.isObsecureText.value ? false : true,
+                              obscureText: controller.isObsecureText.value
+                                  ? false
+                                  : true,
                               keyboardType: TextInputType.text,
                               decoration: InputDecoration(
                                 errorBorder: OutlineInputBorder(
@@ -186,10 +196,15 @@ class Login extends GetView<AuthController> {
                                   onPressed: () {
                                     controller.isObsecureText.toggle();
                                   },
-                                  icon: controller.isObsecureText.value ? Icon(Icons.visibility_off, color: Colors.grey,) : Icon(
-                                    Icons.remove_red_eye,
-                                    color: Colors.grey,
-                                  ),
+                                  icon: controller.isObsecureText.value
+                                      ? Icon(
+                                          Icons.visibility_off,
+                                          color: Colors.grey,
+                                        )
+                                      : Icon(
+                                          Icons.remove_red_eye,
+                                          color: Colors.grey,
+                                        ),
                                 ),
                                 hintStyle: TextStyle(
                                   color: AppColors.textSecondary,
@@ -220,8 +235,11 @@ class Login extends GetView<AuthController> {
                               width: double.infinity,
                               child: ElevatedButton(
                                 onPressed: () {
-                                  if(formKey.currentState!.validate()){
-                                    controller.login(controller.emailC.text, controller.passC.text);
+                                  if (formKey.currentState!.validate()) {
+                                    controller.login(
+                                      controller.emailC.text,
+                                      controller.passC.text,
+                                    );
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
@@ -243,65 +261,78 @@ class Login extends GetView<AuthController> {
                                         ),
                                       ),
                                       SizedBox(width: 5.0),
-                                      Icon(Icons.arrow_forward, size: 20,),
+                                      Icon(Icons.arrow_forward, size: 20),
                                     ],
                                   ),
                                 ),
                               ),
                             ),
 
-                            SizedBox(height: 15,),
+                            SizedBox(height: 15),
 
-                            Align(alignment: Alignment.center,
-                            child: Text('Or continue with', style: TextStyle(
-                              color: AppColors.textSecondary,
-                              fontFamily: 'Inter',
-                            ),),),
+                            Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                'Or continue with',
+                                style: TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ),
 
-                            SizedBox(height: 10,),
+                            SizedBox(height: 10),
 
                             Container(
                               width: double.infinity,
                               padding: EdgeInsetsGeometry.all(1.0),
-                              child: OutlinedButton(onPressed: (){
-                                controller.googleSignIn();
-                              }, 
-                              style: OutlinedButton.styleFrom(
-                                overlayColor: AppColors.primaryLight,
-                                side: BorderSide(
-                                  width: 0.2,
-                                  color: Colors.grey
+                              child: OutlinedButton(
+                                onPressed: () {
+                                  controller.googleSignIn();
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  overlayColor: AppColors.primaryLight,
+                                  side: BorderSide(
+                                    width: 0.2,
+                                    color: Colors.grey,
+                                  ),
+                                  padding: EdgeInsetsGeometry.symmetric(
+                                    vertical: 5.0,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
                                 ),
-                                padding: EdgeInsetsGeometry.symmetric
-                                (vertical: 5.0),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                )
+                                child: CircleAvatar(
+                                  backgroundImage: AssetImage(
+                                    'assets/icons/GoogleLogo.png',
+                                  ),
+                                  backgroundColor: AppColors.background,
+                                ),
                               ),
-                              child: CircleAvatar(
-                                backgroundImage: AssetImage('assets/icons/GoogleLogo.png'),
-                                backgroundColor: AppColors.background,
-                              )),
                             ),
 
-                            SizedBox(height: 18,),
+                            SizedBox(height: 18),
 
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text("Don't have an account?"),
-                                TextButton(onPressed: (){
-                                  Get.toNamed('/register');
-                                }, 
-                                style: TextButton.styleFrom(
-                                  padding: EdgeInsets.zero,
-                                  minimumSize: Size.zero,
-                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                  foregroundColor: AppColors.primary
+                                TextButton(
+                                  onPressed: () {
+                                    Get.toNamed('/register');
+                                  },
+                                  style: TextButton.styleFrom(
+                                    padding: EdgeInsets.zero,
+                                    minimumSize: Size.zero,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    foregroundColor: AppColors.primary,
+                                  ),
+                                  child: Text('Sign up'),
                                 ),
-                                child: Text('Sign up'))
                               ],
-                            )
+                            ),
                           ],
                         ),
                       ),

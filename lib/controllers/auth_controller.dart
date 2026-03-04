@@ -11,16 +11,25 @@ class AuthController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final isLoading = false.obs;
-  final isSignup = false.obs;
   Rx<User?> user = Rx<User?>(null);
   late TextEditingController emailC;
   late TextEditingController passC;
   final isObsecureText = false.obs;
+  final isObsecureTextPassReg = false.obs;
+  final isObsecureTextRegConfirmPass = false.obs;
+
+  late TextEditingController nameReg;
+  late TextEditingController emailReg;
+  late TextEditingController passReg;
 
   @override
   void onInit() {
     emailC = TextEditingController();
     passC = TextEditingController();
+
+    nameReg = TextEditingController();
+    emailReg = TextEditingController();
+    passReg = TextEditingController();
 
     user.bindStream(_auth.authStateChanges());
 
@@ -30,16 +39,14 @@ class AuthController extends GetxController {
 
   void setCurrentView(User? user) async {
     try {
-      if (isSignup.value) return;
-
       if (user != null) {
         final userDoc = await _firestore
             .collection('users')
             .doc(user.uid)
             .get();
 
-        if (userDoc.exists) {
-          String role = userDoc['role'];
+        if (userDoc.exists && userDoc.data() != null) {
+          String role = userDoc['role'] ?? 'Admin';
 
           if (role == 'Admin') {
             Get.offAllNamed('/Admin-view');
@@ -48,12 +55,23 @@ class AuthController extends GetxController {
           } else if (role == 'Peminjam') {
             Get.offAllNamed('/Peminjam-view');
           }
+        } else {
+          return;
         }
       } else {
         Get.offAll(() => Login());
       }
     } catch (error) {
-      Get.snackbar('gagal', 'User tidak di temukan, silahkan coba lagi nanti');
+      Get.snackbar(
+        'gagal',
+        'User tidak di temukan, silahkan coba lagi nanti',
+        backgroundColor: AppColors.error,
+        snackPosition: SnackPosition.TOP,
+        animationDuration: Duration(milliseconds: 800),
+        duration: Duration(seconds: 3),
+        icon: Icon(Icons.warning),
+        colorText: AppColors.background,
+      );
     }
   }
 
@@ -98,19 +116,26 @@ class AuthController extends GetxController {
         duration: Duration(seconds: 3),
         icon: Icon(Icons.warning),
         colorText: AppColors.background,
-
       );
     } catch (error) {
       isLoading.value = false;
       emailC.clear();
       passC.clear();
-      Get.snackbar('Gagal', 'Terjadi Kesalahan, silahkan coba lagi nanti');
+      Get.snackbar(
+        'Gagal',
+        'Terjadi Kesalahan, silahkan coba lagi nanti',
+        backgroundColor: AppColors.error,
+        snackPosition: SnackPosition.TOP,
+        animationDuration: Duration(milliseconds: 800),
+        duration: Duration(seconds: 3),
+        icon: Icon(Icons.warning),
+        colorText: AppColors.background,
+      );
     }
   }
 
   Future<void> signin(String nama, String email, String password) async {
     try {
-      isSignup.value = true;
       final UserCredential currentUser = await _auth
           .createUserWithEmailAndPassword(email: email, password: password);
 
@@ -125,13 +150,26 @@ class AuthController extends GetxController {
       Get.back();
       Get.snackbar(
         'Success',
-        'Silahkan melakukan verifikasi email yang sudah kami kirim. check mailbox/spam',
+        'Data kamu sudah tersimpan dengan aman. Selamat menikmati kemudahan pinjam-meminjam barang.',
+        backgroundColor: AppColors.primary,
+        colorText: AppColors.primaryLight,
+        animationDuration: Duration(milliseconds: 800),
+        duration: Duration(seconds: 3),
       );
     } on FirebaseAuthException catch (e) {
       final errorMessage = messageError(e.code);
       Get.snackbar('Gagal', errorMessage);
     } catch (error) {
-      Get.snackbar('Terjadi kesalahan', 'Silahkan coba lagi nanti');
+      Get.snackbar(
+        'Terjadi kesalahan',
+        'Silahkan coba lagi nanti',
+        backgroundColor: AppColors.error,
+        snackPosition: SnackPosition.TOP,
+        animationDuration: Duration(milliseconds: 800),
+        duration: Duration(seconds: 3),
+        icon: Icon(Icons.warning),
+        colorText: AppColors.background,
+      );
     }
   }
 
@@ -151,11 +189,11 @@ class AuthController extends GetxController {
         idToken: googleAuth.idToken,
       );
 
+      isLoading.value = true;
       final UserCredential currentUser = await _auth.signInWithCredential(
         credential,
       );
 
-      isLoading.value = true;
 
       final User? user = currentUser.user;
 
@@ -175,16 +213,45 @@ class AuthController extends GetxController {
           );
 
           await userDoc.set(newUser.toMap());
+
+          Get.toNamed('/Peminjam-view');
         } else {
           await userDoc.update({'createdAt': FieldValue.serverTimestamp()});
-          Get.snackbar('Welcome Back', 'Berhasil melakukan Login');
+
+          setCurrentView(user);
+
+          String username = googleUser.displayName ?? 'User';
+          Get.snackbar(
+            'Selamat Datang kembali $username',
+            'Berhasil masuk menggunakan akun Google.',
+            backgroundColor: AppColors.primary,
+            snackPosition: SnackPosition.TOP,
+            animationDuration: Duration(milliseconds: 800),
+            duration: Duration(seconds: 3),
+            icon: Icon(Icons.check_circle),
+            colorText: AppColors.background,
+          );
         }
       }
     } catch (error) {
-      Get.snackbar('gagal', 'Terjadi Kesalahan Silahkan Coba lagi nanti');
+      Get.snackbar(
+        'gagal',
+        'Terjadi Kesalahan Silahkan Coba lagi nanti',
+        backgroundColor: AppColors.error,
+        snackPosition: SnackPosition.TOP,
+        animationDuration: Duration(milliseconds: 800),
+        duration: Duration(seconds: 3),
+        icon: Icon(Icons.warning),
+        colorText: AppColors.background,
+      );
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> logout() async {
+    await GoogleSignIn().signOut();
+    await _auth.signOut();
   }
 
   String messageError(String message) {
