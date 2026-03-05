@@ -5,6 +5,7 @@ class UserModel {
   final String nama;
   final String email;
   final String role;
+  String? profile;
   final dynamic createdAt;
 
   UserModel({
@@ -12,6 +13,7 @@ class UserModel {
     required this.nama,
     required this.email,
     required this.role,
+    this.profile,
     this.createdAt,
   });
 
@@ -20,6 +22,7 @@ class UserModel {
       'nama': nama,
       'email': email,
       'role': role,
+      'profile': profile ?? '-',
       'createdAt': FieldValue.serverTimestamp(),
     };
   }

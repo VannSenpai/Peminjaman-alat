@@ -22,6 +22,8 @@ class AuthController extends GetxController {
   late TextEditingController emailReg;
   late TextEditingController passReg;
 
+  late TextEditingController emailReset;
+
   @override
   void onInit() {
     emailC = TextEditingController();
@@ -30,6 +32,8 @@ class AuthController extends GetxController {
     nameReg = TextEditingController();
     emailReg = TextEditingController();
     passReg = TextEditingController();
+
+    emailReset = TextEditingController();
 
     user.bindStream(_auth.authStateChanges());
 
@@ -194,7 +198,6 @@ class AuthController extends GetxController {
         credential,
       );
 
-
       final User? user = currentUser.user;
 
       if (user != null) {
@@ -210,6 +213,7 @@ class AuthController extends GetxController {
             nama: user.displayName ?? 'unknow',
             email: user.email ?? 'Test@gmail.com',
             role: 'Peminjam',
+            profile: user.photoURL ?? '-',
           );
 
           await userDoc.set(newUser.toMap());
@@ -252,6 +256,52 @@ class AuthController extends GetxController {
   Future<void> logout() async {
     await GoogleSignIn().signOut();
     await _auth.signOut();
+  }
+
+  Future<void> resetPassword(String email) async {
+    if (email.isEmpty) {
+      Get.snackbar(
+        'Terjadi kesalahan',
+        'Email tidak boleh kosong!',
+        backgroundColor: AppColors.error,
+        snackPosition: SnackPosition.TOP,
+        animationDuration: Duration(milliseconds: 800),
+        duration: Duration(seconds: 3),
+        icon: Icon(Icons.warning),
+        colorText: AppColors.background,
+      );
+    }
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      Get.snackbar(
+        'Berhasil',
+        'Link reset password telah dikirim ke email, cek Inbox/Spam',
+        backgroundColor: AppColors.primary,
+        colorText: Colors.white,
+      );
+    } on FirebaseAuthException catch (e) {
+      Get.snackbar(
+        'Terjadi Kesalahan',
+        e.code,
+        backgroundColor: AppColors.error,
+        snackPosition: SnackPosition.TOP,
+        animationDuration: Duration(milliseconds: 800),
+        duration: Duration(seconds: 3),
+        icon: Icon(Icons.warning),
+        colorText: AppColors.background,
+      );
+    } catch (error) {
+      Get.snackbar(
+        'Gagal',
+        'Terjadi kesalahan silahkan coba lagi nanti',
+        backgroundColor: AppColors.error,
+        snackPosition: SnackPosition.TOP,
+        animationDuration: Duration(milliseconds: 800),
+        duration: Duration(seconds: 3),
+        icon: Icon(Icons.warning),
+        colorText: AppColors.background,
+      );
+    }
   }
 
   String messageError(String message) {

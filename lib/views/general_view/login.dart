@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:peminjaman_alat/controllers/auth_controller.dart';
 import 'package:peminjaman_alat/utils/app_colors.dart';
+import 'package:peminjaman_alat/views/general_view/reset_password.dart';
 
 class Login extends GetView<AuthController> {
   const Login({super.key});
@@ -217,7 +218,9 @@ class Login extends GetView<AuthController> {
                             Align(
                               alignment: Alignment.centerRight,
                               child: TextButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  Get.toNamed(ResetPassword.routeName);
+                                },
                                 child: Text(
                                   'Forgot Password?',
                                   style: TextStyle(
