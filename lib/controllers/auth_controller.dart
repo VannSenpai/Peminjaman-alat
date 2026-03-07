@@ -43,6 +43,7 @@ class AuthController extends GetxController {
 
   void setCurrentView(User? user) async {
     try {
+      isLoading.value = true;
       if (user != null) {
         final userDoc = await _firestore
             .collection('users')
@@ -66,6 +67,7 @@ class AuthController extends GetxController {
         Get.offAll(() => Login());
       }
     } catch (error) {
+      isLoading.value = false;
       Get.snackbar(
         'gagal',
         'User tidak di temukan, silahkan coba lagi nanti',
@@ -76,7 +78,7 @@ class AuthController extends GetxController {
         icon: Icon(Icons.warning),
         colorText: AppColors.background,
       );
-    }
+    } 
   }
 
   Future<void> login(String email, String password) async {
